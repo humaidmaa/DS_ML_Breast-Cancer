@@ -1,7 +1,7 @@
 # Title: Breast Cancer study
 # Name: Mansour Alhumaid
 # Date: 02 Nov 2020
-# the data contain Clinical features were observed or measured for 64 patients with breast cancer and 52 healthy controls.
+#The data contain Clinical features were observed or measured for 64 patients with breast cancer and 52 healthy controls.
 #The dataset is downloaded from The UCI Machine Learning Repository
 #There are 10 predictors, all quantitative, and a binary dependent variable, indicating the presence or absence of breast cancer.
 #The predictors are anthropometric data and parameters which can be gathered in routine blood analysis.
