@@ -14,6 +14,8 @@
 # load packages
 library(tidyverse)
 library(rio)
+library(ggstatsplot)
+library(ggplot2)
 library(scales)
 library(GGally)
 library(recipes)
@@ -44,8 +46,6 @@ which(is.na(df))
 any(is.na(df))
 
 #Finding Outliers
-library(ggstatsplot)
-library(ggplot2)
 
 # Create a boxplot of the dataset.
 boxplot(df,horizontal = T)
@@ -61,26 +61,26 @@ boxplot(df$Adiponectin)
 boxplot(df$Resistin)
 boxplot(df$MCP.1)#no outliers
 
-# You can get the actual values of the outliers with this
+# To get the actual values of the outliers with this
 
 boxplot(df$MCP.1)$out
 
-# Now you can assign the outlier values into a vector
+# To assign the outlier values into a vector
 
 outliers=boxplot(df$MCP.1, plot=FALSE)$out
 print(outliers)
 
 #Removing the outliers
 
-# First you need find in which rows the outliers are
+# First need find in which rows the outliers are
 
 df[which(df$MCP.1 %in% outliers),]
 
-# Now you can remove the rows containing the outliers, one possible option is:
+# Now remove the rows containing the outliers, one possible option is:
 
 df = df[-which(df$MCP.1 %in% outliers),]
 
-# If you check now with boxplot, you will notice that those pesky outliers are gone
+# check now with boxplot,  will notice that those pesky outliers are gone
 
 boxplot(df$MCP.1)
 
@@ -94,6 +94,42 @@ df[which(df$Adiponectin %in% outliers),]
 df = df[-which(df$Adiponectin %in% outliers),]
 boxplot(df$Adiponectin)
 
+##Visualization
+# plain gragh is seen
+ggplot(data=df, aes(x=BMI, y=MCP.1))
+#add  geometry
+ggplot(data=df, aes(x=BMI, y=MCP.1))+ geom_point()
+#add  color
+#Lines
+a=ggplot(data=df, aes(x=BMI, y=MCP.1, colour=Classification))+geom_point()
+a
+#add  size
+ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification, Size=BMI))+ geom_point()
+#ploting with layers
+p<-ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification))
+# point
+a+geom_point(aes(size=BMI))
+#multiple layer
+p+geom_point()+geom_line()
+
+##If the insulin is in the range of 0-20 ,
+#MCP-1 is ranging in between 230 -1050 then there is a chance that the person can get breast cancer
+
+# mapping vs setting
+r<-ggplot(data=df, aes(x=Glucose, y=MCP.1))
+# add color
+# mapping
+r+geom_point(aes(colour=Classification))
+# setting
+# mapping
+r+geom_point(aes(size=Classification))
+#If your glucose and MCP level are high then there is a change that you may get cancer
+# setting
+r+geom_point(size=10)
+
+#----Denisty chart
+s+geom_density(aes(fill=Classification))
+#IF your MCP count is between 0-250 then there is a chance that to get cancer
 
 #model building
 library(caTools)
