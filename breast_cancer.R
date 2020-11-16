@@ -25,48 +25,38 @@ library(rsample)
 library(vip)
 library(corrplot)
 library(caTools)
-
-
+library('caret')
+library(car)
 
 df <- read.csv("Data/dataR2.csv")
+
+#EDA
 nrow(df)
 ncol(df)
 head(df)
 tail(df)
 str(df)
 
-#EDA
+
 #Conversion
 df$Classification=factor(df$Classification)
 df$Age=factor(df$Age)
-str(df)
-summary(df)
+df=subset(df,select = -c(1,10))
 
 #finding null values
 
 which(is.na(df))
 any(is.na(df))
 
-boxplot(df$MCP.1)
-
-outliers=boxplot(df$Resistin, plot=FALSE)$out
-df[which(df$Resistin %in% outliers),]
-df = df[-which(df$Resistin %in% outliers),]
-boxplot(df$Resistin)
-
-outliers=boxplot(df$Adiponectin, plot=FALSE)$out
-df[which(df$Adiponectin %in% outliers),]
-df = df[-which(df$Adiponectin %in% outliers),]
-boxplot(df$Adiponectin)
 
 ##Visualization
-
+boxplot(df$MCP.1)
 #Lines
 a <- ggplot(data=df, aes(x=BMI, y=MCP.1, colour=Classification))+geom_point()
 a
 #add  size
 ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification, Size=BMI))+ geom_point()
-#ploting with layers
+#plotting with layers
 p<-ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification))
 # point
 a+geom_point(aes(size=BMI))
@@ -95,7 +85,7 @@ s+geom_density(aes(fill=Classification))
 #Finding correlation
 #when we have various variables,Correlation is an important factor to check the dependencies within themselves
 #its gives us an insight ,between mutual relationship among variables
-#to get correlation among  diff variables for a data set uuse following code
+#to get correlation among  diff variables for a data set use following code
 
 
 plot(df)
@@ -122,14 +112,13 @@ test=subset(df,sample==F)
 #and it reduces the power of your model to identify independent variables that are statistically significant.
 #These are definitely serious problems
 
-library('caret')
+
 df=subset(df,select = -c(MCP.1))
 numericData=df[sapply(df,is.numeric)]
 descrCor=cor(numericData)
 
 #vif
-install.packages("car")
-library(car)
+
 model=lm(MCP.1~.,data=train)
 vif(model)
 #from the above code we will get multicollinearity varibles Insulin and Homa,we need remove those coulmns
