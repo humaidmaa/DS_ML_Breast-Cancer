@@ -16,24 +16,26 @@ library(tidyverse)
 library(rio)
 library(ggstatsplot)
 library(ggplot2)
-library(scales)
-library(GGally)
-library(recipes)
-library(glmnet)
+#library(scales)
+#library(GGally)
+#library(recipes)
+#library(glmnet)
 library(caret)
 library(rsample)
 library(vip)
+library(corrplot)
+library(caTools)
 
 
 
-df=read.csv("C:/Users/mansour/Desktop/git hub/Portfolio_Builder_Exercises/Data/dataR2.csv")
+df <- read.csv("Data/dataR2.csv")
 nrow(df)
 ncol(df)
 head(df)
 tail(df)
 str(df)
 
-
+#EDA
 #Conversion
 df$Classification=factor(df$Classification)
 df$Age=factor(df$Age)
@@ -44,43 +46,6 @@ summary(df)
 
 which(is.na(df))
 any(is.na(df))
-
-#Finding Outliers
-
-# Create a boxplot of the dataset.
-boxplot(df,horizontal = T)
-colnames(df)
-
-#for individual column
-boxplot(df$BMI)#no Outliers
-boxplot(df$Glucose)
-boxplot(df$Insulin)
-boxplot(df$HOMA)
-boxplot(df$Leptin)
-boxplot(df$Adiponectin)
-boxplot(df$Resistin)
-boxplot(df$MCP.1)#no outliers
-
-# To get the actual values of the outliers with this
-
-boxplot(df$MCP.1)$out
-
-# To assign the outlier values into a vector
-
-outliers=boxplot(df$MCP.1, plot=FALSE)$out
-print(outliers)
-
-#Removing the outliers
-
-# First need find in which rows the outliers are
-
-df[which(df$MCP.1 %in% outliers),]
-
-# Now remove the rows containing the outliers, one possible option is:
-
-df = df[-which(df$MCP.1 %in% outliers),]
-
-# check now with boxplot,  will notice that those pesky outliers are gone
 
 boxplot(df$MCP.1)
 
@@ -95,13 +60,9 @@ df = df[-which(df$Adiponectin %in% outliers),]
 boxplot(df$Adiponectin)
 
 ##Visualization
-# plain gragh is seen
-ggplot(data=df, aes(x=BMI, y=MCP.1))
-#add  geometry
-ggplot(data=df, aes(x=BMI, y=MCP.1))+ geom_point()
-#add  color
+
 #Lines
-a=ggplot(data=df, aes(x=BMI, y=MCP.1, colour=Classification))+geom_point()
+a <- ggplot(data=df, aes(x=BMI, y=MCP.1, colour=Classification))+geom_point()
 a
 #add  size
 ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification, Size=BMI))+ geom_point()
@@ -129,26 +90,68 @@ r+geom_point(size=10)
 
 #----Denisty chart
 s+geom_density(aes(fill=Classification))
-#IF your MCP count is between 0-250 then there is a chance that to get cancer
+#IF your MCP count is between 0-250 then there is a chance that u may get cancer
 
-#model building
-library(caTools)
+#Finding correlation
+#when we have various variables,Correlation is an important factor to check the dependencies within themselves
+#its gives us an insight ,between mutual relationship among variables
+#to get correlation among  diff variables for a data set uuse following code
+
+
+plot(df)
+#below codes gives graphical representation
+
+cr=cor(df)
+
+df.cor = cor(df)
+corrplot(df.cor)
+
+corrplot(cr,type='lower')
+corrplot(cr,method='number')#numerical rep
+#from the above code we are getting HOMA AND Insulin are multicollinear varilables
+
+#splitting the data into train and test
+
 set.seed(101)
-sample=sample.split(df,SplitRatio = .7)
+sample=sample.split(df$MCP.1,SplitRatio = .7)
 train=subset(df,sample==T)
 test=subset(df,sample==F)
 
-model=lm(MCP.1~.,data=df)
+#Multicollinearity
+#Multicollinearity makes it hard to interpret your coefficients,
+#and it reduces the power of your model to identify independent variables that are statistically significant.
+#These are definitely serious problems
+
+library('caret')
+df=subset(df,select = -c(MCP.1))
+numericData=df[sapply(df,is.numeric)]
+descrCor=cor(numericData)
+
+#vif
+install.packages("car")
+library(car)
+model=lm(MCP.1~.,data=train)
+vif(model)
+#from the above code we will get multicollinearity varibles Insulin and Homa,we need remove those coulmns
+
+#Now create the model
+model=lm(MCP.1~.,data=train)
+summary(model)
+
+#from summary  we came to know there isless correaltion bw all columns related to target column
+
+#model creation after removing Insulin and Adiponectin
+model=lm(MCP.1~BMI+Resistin+Glucose+HOMA+Insulin+Leptin,data=train)
 summary(model)
 
 pred=predict(model,test)
 pred
 
-library(Metrics)
+#Comparing Predicted vs Actual
+plot(test$MCP.1,type = "l",lyt=1.8,col="red")
+lines(pred,type="l",col="blue")
 
-rmse(test$MCP.1, pred)
+plot(pred,type='l',lyt=1.8,col='blue')#from this data is not seems to be good
 
-
-# Create training feature matrices
-
-X <- model.matrix(MCP.1 ~ ., train)[, -1]
+#Finding Accuracy
+accuracy=sqrt(mean(pred-df$MCP.1)^2)
