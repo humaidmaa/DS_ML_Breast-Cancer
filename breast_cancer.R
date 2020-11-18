@@ -25,7 +25,6 @@ library(rsample)
 library(vip)
 library(corrplot)
 library(caTools)
-library('caret')
 library(car)
 
 df <- read.csv("Data/dataR2.csv")
@@ -80,24 +79,24 @@ r+geom_point(size=10)
 
 #----Denisty chart
 s+geom_density(aes(fill=Classification))
-#IF your MCP count is between 0-250 then there is a chance that u may get cancer
+
+#If MCP count is between 0-250 then there is a chance to get cancer
 
 #Finding correlation
 #when we have various variables,Correlation is an important factor to check the dependencies within themselves
-#its gives us an insight ,between mutual relationship among variables
-#to get correlation among  diff variables for a data set use following code
+#its gives us an insight between mutual relationship among variables
+#to get correlation among  different variables for a data set use following code
 
 
 plot(df)
-#below codes gives graphical representation
+#below codes gives graphical representation of correlation
 
 cr=cor(df)
 
 df.cor = cor(df)
 corrplot(df.cor)
-
-corrplot(cr,type='lower')
-corrplot(cr,method='number')#numerical rep
+#corrplot(cr,type='lower')
+corrplot(cr,method='number')
 #from the above code we are getting HOMA AND Insulin are multicollinear varilables
 
 #splitting the data into train and test
@@ -144,3 +143,23 @@ plot(pred,type='l',lyt=1.8,col='blue')#from this data is not seems to be good
 
 #Finding Accuracy
 accuracy=sqrt(mean(pred-df$MCP.1)^2)
+
+#converting 1 and 2 into 0 and 1
+df$Classification=factor(df$Classification,labels=c(0,1))
+
+
+set.seed(101)
+sample=sample.split(df$Classification,SplitRatio = 0.7)
+train=subset(df,sample==TRUE)
+test=subset(df,sample==FALSE)
+
+model=glm(Classification~.,data=train,family='binomial')#model bulding
+summary(model)
+
+Adiponectin#we need remove this one bcz its has less significance levels
+#bcz
+
+res=predict(model,test,type='response')#predictions
+res
+
+table(ActualValue=test$Classification ,PredictedValue=res>0.5)#confusion matrix
