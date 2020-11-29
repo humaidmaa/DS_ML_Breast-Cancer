@@ -26,6 +26,10 @@ library(vip)
 library(corrplot)
 library(caTools)
 library(car)
+library(FSelector)
+library(data.tree)
+library(rpart)
+library(raprt.plot)
 
 df <- read.csv("Data/dataR2.csv")
 
@@ -126,7 +130,7 @@ vif(model)
 model=lm(MCP.1~.,data=train)
 summary(model)
 
-#from summary  we came to know there isless correaltion bw all columns related to target column
+#from summary  we came to know there is less correaltion bw all columns related to target column
 
 #model creation after removing Insulin and Adiponectin
 model=lm(MCP.1~BMI+Resistin+Glucose+HOMA+Insulin+Leptin,data=train)
@@ -147,19 +151,39 @@ accuracy=sqrt(mean(pred-df$MCP.1)^2)
 #converting 1 and 2 into 0 and 1
 df$Classification=factor(df$Classification,labels=c(0,1))
 
-
+#Model split
 set.seed(101)
 sample=sample.split(df$Classification,SplitRatio = 0.7)
 train=subset(df,sample==TRUE)
 test=subset(df,sample==FALSE)
-
-model=glm(Classification~.,data=train,family='binomial')#model bulding
+#model building
+model=glm(Classification~.,data=train,family='binomial')
 summary(model)
 
-Adiponectin#we need remove this one bcz its has less significance levels
-#bcz
+#we need remove this one because its has less significance levels
+Adiponectin
 
-res=predict(model,test,type='response')#predictions
+#predictions
+res=predict(model,test,type='response')
 res
+#confusion matrix
+table(ActualValue=test$Classification ,PredictedValue=res>0.5)
 
-table(ActualValue=test$Classification ,PredictedValue=res>0.5)#confusion matrix
+#Decision Tree
+
+#Model Building
+tree=rpart(Classification~.,data=train)
+tree
+
+#we can plot
+plot(tree,margin=0.1)
+
+#margin is used to adjust the plot ,for viewing labels
+text(tree,use.n = TRUE,pretty = TRUE,cex=0.8)
+#Predictions
+pred=predict(tree,test,type='class')
+pred
+#Confusion matrix for evaluating the model
+confusionMatrix(pred,test$Classification)
+
+
