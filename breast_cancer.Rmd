@@ -1,0 +1,99 @@
+---
+title: "Breast Cancer Prediction"
+author: "Mansour Alhumaid"
+date: "28 Nov 2020"
+output: html_document
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, 
+                      message = FALSE,
+                      warning = FALSE,
+                      echo = FALSE,
+                      autodep = TRUE, 
+                      fig.align = "center")
+library(tidyverse)
+library(rio)
+library(ggstatsplot)
+library(rsample)   # data splitting
+library(ggplot2)   # plotting
+library(earth)     # fit MARS models
+library(caret)     # automating the tuning process
+library(vip)       # variable importance
+library(pdp)       # variable relationships
+library(randomForest) #its works in regression and classification
+library( kableExtra)
+library(corrplot)
+library(caTools)
+library(car)
+#library(FSelector)
+library(data.tree)
+library(rpart)
+#library(raprt.plot)
+library(class)
+
+
+
+```
+
+
+In this study, a dataset contain Clinical features were observed or measured for 64 patients with breast cancer and 52 healthy controls. The dataset is downloaded from The UCI Machine Learning Repository
+There are 10 predictors, all quantitative, and a binary dependent variable, indicating the presence or absence of breast cancer. The predictors are anthropometric data and parameters which can be gathered in routine blood analysis. Prediction models based on these predictors, if accurate, can potentially be used as a biomarker of breast cancer.
+
+Data From:
+https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Coimbra
+
+
+
+```{r}
+
+# read the data 
+df <- read.csv("Data/dataR2.csv")
+```
+
+
+
+
+#### EDA
+as start on the exploration process on the data, to explore available features and observations of each:
+
+
+```{r}
+nrow(df)
+ncol(df)
+head(df)
+tail(df)
+str(df)
+
+```
+
+#### Conversion
+```{r}
+
+df$Classification=factor(df$Classification)
+df$Age=factor(df$Age)
+df=subset(df,select = -c(1,10))
+```
+
+
+
+
+
+#### finding null values
+```{r}
+which(is.na(df))
+any(is.na(df))
+```
+
+
+
+
+####  Visualization
+```{r}
+boxplot(df$MCP.1)
+```
+
+
+
+
