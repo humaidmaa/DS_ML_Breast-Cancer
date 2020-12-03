@@ -96,4 +96,114 @@ boxplot(df$MCP.1)
 
 
 
+```{r}
+a <- ggplot(data=df, aes(x=BMI, y=MCP.1))+geom_point()
+a
+```
+```{r}
+ggplot(data=df, aes(x=Insulin, y=MCP.1, Size=BMI))+ geom_point()
+```
+
+```{r}
+p<-ggplot(data=df, aes(x=Insulin, y=MCP.1, colour=Classification))
+```
+
+
+#### observation:
+If the insulin is in the range of 0-20 ,
+MCP-1 is ranging in between 230 -1050 then there is a chance that the person can get breast cancer
+
+
+
+# mapping vs setting
+
+```{r}
+r<-ggplot(data=df, aes(x=Glucose, y=MCP.1))
+#If your glucose and MCP level are high then there is a change that you may get cancer
+
+r+geom_point(size=10)
+
+#r+geom_density(aes(fill=blue))
+#If MCP count is between 0-250 then there is a chance to get cancer
+
+```
+
+#### Finding correlation
+
+when we have various variables,Correlation is an important factor to check the dependencies within themselves
+its gives us an insight between mutual relationship among variables
+to get correlation among  different variables for a data set use followin
+
+
+```{r}
+plot(df)
+#below codes gives graphical representation of correlation
+cr=cor(df)
+df.cor = cor(df)
+corrplot(df.cor)
+#corrplot(cr,type='lower')
+corrplot(cr,method='number')
+#from the above code we are getting HOMA AND Insulin are multicollinear varilables
+```
+
+
+
+```{r}
+
+```
+
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
+
+
+
+```{r}
+
+```
 
